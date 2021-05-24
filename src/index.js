@@ -8,44 +8,47 @@ import styles from './styles.css';
 // =============================================================================
 function docsifyCopyCode(hook, vm) {
     hook.doneEach(function() {
-        const targetElms = Array.apply(null, document.querySelectorAll('pre[data-lang]'));
-        const i18n = {
-            buttonText: 'Copy to clipboard',
-            errorText: 'Error',
-            successText: 'Copied'
-        };
+        // delay for waiting React to mounte component
+        setTimeout(() => {
+            const targetElms = Array.apply(null, document.querySelectorAll('pre[data-lang]'));
+            const i18n = {
+                buttonText: 'Copy to clipboard',
+                errorText: 'Error',
+                successText: 'Copied'
+            };
 
-        // Update i18n strings based on options and location.href
-        if (vm.config.copyCode) {
-            Object.keys(i18n).forEach(key => {
-                const textValue = vm.config.copyCode[key];
+            // Update i18n strings based on options and location.href
+            if (vm.config.copyCode) {
+                Object.keys(i18n).forEach(key => {
+                    const textValue = vm.config.copyCode[key];
 
-                if (typeof textValue === 'string') {
-                    i18n[key] = textValue;
-                }
-                else if (typeof textValue === 'object') {
-                    Object.keys(textValue).some(match => {
-                        const isMatch = location.href.indexOf(match) > -1;
+                    if (typeof textValue === 'string') {
+                        i18n[key] = textValue;
+                    }
+                    else if (typeof textValue === 'object') {
+                        Object.keys(textValue).some(match => {
+                            const isMatch = location.href.indexOf(match) > -1;
 
-                        i18n[key] = isMatch ? textValue[match] : i18n[key];
+                            i18n[key] = isMatch ? textValue[match] : i18n[key];
 
-                        return isMatch;
-                    });
-                }
+                            return isMatch;
+                        });
+                    }
+                });
+            }
+
+            const template = [
+                '<button class="docsify-copy-code-button">',
+                `<span class="label">${i18n.buttonText}</span>`,
+                `<span class="error">${i18n.errorText}</span>`,
+                `<span class="success">${i18n.successText}</span>`,
+                '</button>'
+            ].join('');
+
+            targetElms.forEach(elm => {
+                elm.insertAdjacentHTML('beforeend', template);
             });
-        }
-
-        const template = [
-            '<button class="docsify-copy-code-button">',
-            `<span class="label">${i18n.buttonText}</span>`,
-            `<span class="error">${i18n.errorText}</span>`,
-            `<span class="success">${i18n.successText}</span>`,
-            '</button>'
-        ].join('');
-
-        targetElms.forEach(elm => {
-            elm.insertAdjacentHTML('beforeend', template);
-        });
+        }, 200);
     });
 
     hook.mounted(function() {
